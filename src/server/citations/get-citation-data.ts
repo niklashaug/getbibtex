@@ -2,7 +2,7 @@ import urlMetadata from "url-metadata";
 import { type EntryData } from "./types";
 import { createCiteKey } from "./create-citekey";
 import { getCurrentDateString } from "@/utils/date-format";
-import { encodeCharactersInBibTex } from "@/utils/bibtex-encode-characters";
+import { createAccessedNote, encodeCharactersInBibTex } from "@/utils/bibtex";
 import puppeteer from "puppeteer";
 import fs from "fs";
 import { pipeline } from "stream";
@@ -122,7 +122,7 @@ function bibtexFromEntryData(entryData: EntryData): string {
 \ttitle = {${title}},
 \thowpublished = {\\url{${entryData.url}}},
 \tyear = {},
-\tnote = {[Zugriff am ${currentDate}]},
+\tnote = {${createAccessedNote()},
 }`;
 
   return bibtex;

@@ -2,17 +2,15 @@ import { api } from "@/utils/api";
 import { Layout } from "@/ui/layout";
 import { Input } from "@/ui/input";
 import { Button } from "@/ui/button";
-import {
-  ArrowRightCircle,
-} from "lucide-react";
+import { ArrowRightCircle } from "lucide-react";
 import React, { useState } from "react";
 import { Textarea } from "@/ui/textarea";
 import type { EntryData } from "@/server/citations/types";
-import { getCurrentDateString } from "@/utils/date-format";
 import { useUserId } from "@/utils/use-user-id";
 import { ErrorForm } from "@/components/main/error";
 import { CopyToClipboardButton } from "@/components/main/copy-to-clipboard-button";
 import { Navigation } from "@/components/main/navigation";
+import { createAccessedNote } from "@/utils/bibtex";
 
 export default function Home() {
   const userId = useUserId();
@@ -97,7 +95,7 @@ export default function Home() {
                     ". "}{" "}
                 </span>
                 <a href={bibtexEntryData.url}>{bibtexEntryData.url}</a>,
-                <span> [Accessed {getCurrentDateString()}]</span>
+                <span> {createAccessedNote()}</span>
               </div>
             </>
           </div>
@@ -107,7 +105,6 @@ export default function Home() {
     </Layout>
   );
 }
-
 
 const HeaderText = () => (
   <>

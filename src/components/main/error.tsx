@@ -1,8 +1,7 @@
 import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
 import { Textarea } from "@/ui/textarea";
-import { encodeCharactersInBibTex } from "@/utils/bibtex-encode-characters";
-import { getCurrentDateString } from "@/utils/date-format";
+import { createAccessedNote, encodeCharactersInBibTex } from "@/utils/bibtex";
 import { useState } from "react";
 import { CopyToClipboardButton } from "./copy-to-clipboard-button";
 
@@ -125,7 +124,7 @@ const createFallbackBibtexEntry = ({
 \ttitle = {${title ? encodeCharactersInBibTex(title) : ""}},
 \thowpublished = {\\url{${url ?? ""}}},
 \tyear = {},
-\tnote = {[Accessed ${getCurrentDateString()}]},
+\tnote = {${createAccessedNote()},
 }`;
 
   return bibtexEmptyEntry;
