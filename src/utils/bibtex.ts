@@ -10,5 +10,5 @@ export function encodeCharactersInBibTex(str: string): string {
 
 export function createAccessedNote() {
   const currentDate = getCurrentDateString();
-  return `[Zugriff am ${currentDate}]`;
+  return `Zugriff am {${currentDate}}`;
 }

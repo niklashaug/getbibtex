@@ -124,7 +124,7 @@ const createFallbackBibtexEntry = ({
 \ttitle = {${title ? encodeCharactersInBibTex(title) : ""}},
 \thowpublished = {\\url{${url ?? ""}}},
 \tyear = {},
-\tnote = {${createAccessedNote()},
+\tnote = {${createAccessedNote()}},
 }`;
 
   return bibtexEmptyEntry;
