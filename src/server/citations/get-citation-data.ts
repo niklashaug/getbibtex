@@ -3,27 +3,47 @@ import { type EntryData } from "./types";
 import { createCiteKey } from "./create-citekey";
 import { getCurrentDateString } from "@/utils/date-format";
 import { encodeCharactersInBibTex } from "@/utils/bibtex-encode-characters";
+import puppeteer from "puppeteer";
 
 export const getCitation = async (url: string) => {
-  let serializedUrl = url.trim();
-  serializedUrl = addProtocol(serializedUrl);
-  let metadata = await urlMetadata(serializedUrl);
+  let metadata = await urlMetadata(url);
   // When failed to fetch metadata try again with `www` subdomain
   if (!metadata.title) {
-    serializedUrl = addSubdomain(url);
-    metadata = await urlMetadata(serializedUrl);
+    url = addSubdomain(url);
+    metadata = await urlMetadata(url);
   }
-  const domain = domainFromUrl(serializedUrl);
+  const domain = domainFromUrl(url);
   const entryData: EntryData = {
     title: metadata.title,
     author: metadata.author,
-    url: url,
+    url,
     website: domain,
   };
+
+  void downloadPdf(url, metadata.title);
 
   const bibtex: string = bibtexFromEntryData(entryData);
 
   return { bibtex, entryData };
+};
+
+const downloadPdf = async (url: string, title: string) => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  await page.goto(url, { waitUntil: "networkidle2" });
+
+  await page.pdf({
+    path: `./pdfs/${title}.pdf`,
+    format: "a4",
+  });
+
+  await browser.close();
+};
+
+export const serializeUrl = (url: string): string => {
+  const serializedUrl = url.trim();
+  return addProtocol(serializedUrl);
 };
 
 function addProtocol(url: string): string {
@@ -63,7 +83,7 @@ function bibtexFromEntryData(entryData: EntryData): string {
   // TODO: check if there are no invalid characters for bibtex
   const currentDate = getCurrentDateString();
   const title = encodeCharactersInBibTex(
-    `${entryData.title ? entryData.title + ' --- ' : ''}${entryData.website}`,
+    `${entryData.title ? entryData.title + " --- " : ""}${entryData.website}`,
   );
   const bibtex = `@misc{${createCiteKey(entryData)},
 \tauthor = {${entryData.author}},
@@ -75,4 +95,3 @@ function bibtexFromEntryData(entryData: EntryData): string {
 
   return bibtex;
 }
-
