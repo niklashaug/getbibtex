@@ -4,6 +4,12 @@ import { createCiteKey } from "./create-citekey";
 import { getCurrentDateString } from "@/utils/date-format";
 import { encodeCharactersInBibTex } from "@/utils/bibtex-encode-characters";
 import puppeteer from "puppeteer";
+import fs from "fs";
+import { pipeline } from "stream";
+import { promisify } from "util";
+import * as path from "node:path";
+
+const streamPipeline = promisify(pipeline);
 
 export const getCitation = async (url: string) => {
   let metadata = await urlMetadata(url);
@@ -31,15 +37,41 @@ const downloadPdf = async (url: string, title: string) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  await page.goto(url, { waitUntil: "networkidle2" });
+  const response = await page.goto(url, { waitUntil: "networkidle2" });
 
-  await page.pdf({
-    path: `./pdfs/${title}.pdf`,
-    format: "a4",
-  });
+  const contentType = response?.headers()["content-type"];
+  const isPdf = contentType?.includes("application/pdf");
+
+  const parsedUrl = new URL(url);
+  const pathname = parsedUrl.pathname;
+  const fileName = path.basename(pathname);
+
+  const fileNameWithoutExtension = fileName.replace(".pdf", "");
+
+  const outputPath = `./pdfs/${new Date().getTime()}-${isPdf ? fileNameWithoutExtension : title}.pdf`;
+
+  if (isPdf) {
+    await downloadFile(url, outputPath);
+  } else {
+    await page.pdf({
+      path: outputPath,
+      format: "a4",
+    });
+  }
 
   await browser.close();
 };
+
+async function downloadFile(url: string, outputPath: string) {
+  const response = await fetch(url);
+  if (!response.ok)
+    throw new Error(
+      `Issue when trying to download file: ${response.statusText}`,
+    );
+
+  const fileStream = fs.createWriteStream(outputPath);
+  await streamPipeline(response.body, fileStream);
+}
 
 export const serializeUrl = (url: string): string => {
   const serializedUrl = url.trim();
@@ -90,7 +122,7 @@ function bibtexFromEntryData(entryData: EntryData): string {
 \ttitle = {${title}},
 \thowpublished = {\\url{${entryData.url}}},
 \tyear = {},
-\tnote = {[Accessed ${currentDate}]},
+\tnote = {[Zugriff am ${currentDate}]},
 }`;
 
   return bibtex;
