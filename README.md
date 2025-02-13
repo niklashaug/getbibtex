@@ -45,9 +45,10 @@ This project was more goal oriented rather than education oriented. I've mostly 
 ## Development
 
 1. Install dependencies with `npm install`.
-1. Create a local db with `docker compose up`. You can browse local db under http://0.0.0.0:8081/db/test.
-1. Run frontend application with `npm run dev`.
-1. Access application under http://localhost:3000.
+2. Create a local db with `docker compose up`. You can browse local db under http://0.0.0.0:8081/db/test.
+3. Create `.env` file based on `.env.example`.
+4. Run frontend application with `npm run dev`.
+5. Access application under http://localhost:3000.
 
 ## Deployment
 
